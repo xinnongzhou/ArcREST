@@ -1,9 +1,11 @@
 import os
 import json
-import arcpy
 import types
 import general
 from .._abstract import abstract
+from .. import arcpyFound
+if arcpyFound:
+    import arcpy
 ########################################################################
 class SpatialReference(abstract.AbstractGeometry):
     """ creates a spatial reference instance """
@@ -54,7 +56,7 @@ class Point(abstract.AbstractGeometry):
         if isinstance(coord, list):
             self._x = float(coord[0])
             self._y = float(coord[1])
-        elif isinstance(coord, arcpy.Geometry):
+        elif arcpyFound and isinstance(coord, arcpy.Geometry):
             self._x = coord.centroid.X
             self._y = coord.centroid.Y
             self._z = coord.centroid.Z
@@ -95,7 +97,10 @@ class Point(abstract.AbstractGeometry):
     @property
     def asArcPyObject(self):
         """ returns the Point as an ESRI arcpy.Point object """
-        return arcpy.AsShape(self.asDictionary, True)
+        if arcpyFound:
+            return arcpy.AsShape(self.asDictionary, True)
+        else:
+            raise ImportError("ArcPy is needed for this property")
     #----------------------------------------------------------------------
     @property
     def asDictionary(self):
@@ -183,8 +188,10 @@ class MultiPoint(abstract.AbstractGeometry):
         """Constructor"""
         if isinstance(points, list):
             self._points = points
-        elif isinstance(points, arcpy.Geometry):
+        elif arcpyFound and isinstance(points, arcpy.Geometry):
             self._points = self.__geomToPointList(points)
+        else:
+            raise AttributeError("Invalid geometry type.")
         self._wkid = wkid
         self._hasZ = hasZ
         self._hasM = hasM
@@ -226,7 +233,10 @@ class MultiPoint(abstract.AbstractGeometry):
     @property
     def asArcPyObject(self):
         """ returns the Point as an ESRI arcpy.MultiPoint object """
-        return arcpy.AsShape(self.asDictionary, True)
+        if arcpyFound:
+            return arcpy.AsShape(self.asDictionary, True)
+        else:
+            raise ImportError("ArcPy is needed for this property")
     #----------------------------------------------------------------------
     @property
     def asDictionary(self):
@@ -265,8 +275,10 @@ class Polyline(abstract.AbstractGeometry):
         """Constructor"""
         if isinstance(paths, list):
             self._paths = paths
-        elif isinstance(paths, arcpy.Geometry):
+        elif arcpyFound and isinstance(paths, arcpy.Geometry):
             self._paths = self.__geomToPointList(paths)
+        else:
+            raise AttributeError("Invalid geometry type.")
         self._wkid = wkid
         self._hasM = hasM
         self._hasZ = hasZ
@@ -309,10 +321,14 @@ class Polyline(abstract.AbstractGeometry):
             self._json = value
         return self._json
     #----------------------------------------------------------------------
+
     @property
     def asArcPyObject(self):
         """ returns the Polyline as an ESRI arcpy.Polyline object """
-        return arcpy.AsShape(self.asDictionary, True)
+        if arcpyFound:
+            return arcpy.AsShape(self.asDictionary, True)
+        else:
+            raise ImportError("ArcPy is needed to perform this operation.")
     #----------------------------------------------------------------------
     @property
     def asDictionary(self):
@@ -348,10 +364,12 @@ class Polygon(abstract.AbstractGeometry):
         """Constructor"""
         if isinstance(rings, list):
             self._rings = rings
-        elif isinstance(rings, arcpy.Geometry):
+        elif arcpyFound and isinstance(rings, arcpy.Geometry):
             self._rings = self.__geomToPointList(rings)
 ##            self._json = rings.JSON
 ##            self._dict = _unicode_convert(json.loads(self._json))
+        else:
+            raise AttributeError("Invalid geometry type.")
         self._wkid = wkid
         self._hasM = hasM
         self._hasZ = hasZ
@@ -410,7 +428,10 @@ class Polygon(abstract.AbstractGeometry):
     @property
     def asArcPyObject(self):
         """ returns the Polyline as an ESRI arcpy.Polyline object """
-        return arcpy.AsShape(self.asDictionary, True)
+        if arcpyFound:
+            return arcpy.AsShape(self.asDictionary, True)
+        else:
+            raise ImportError("ArcPy is needed for this property")
     #----------------------------------------------------------------------
     @property
     def asDictionary(self):
@@ -538,11 +559,14 @@ class Envelope(abstract.AbstractGeometry):
     @property
     def asArcPyObject(self):
         """ returns the Envelope as an ESRI arcpy.Polygon object """
-        env = self.asDictionary
-        ring = [[
-            Point(env['xmin'], env['ymin'], self._wkid),
-            Point(env['xmax'], env['ymin'], self._wkid),
-            Point(env['xmax'], env['ymax'], self._wkid),
-            Point(env['xmin'], env['ymax'], self._wkid)
-            ]]
-        return Polygon(ring, self._wkid).asArcPyObject
+        if arcpyFound:
+            env = self.asDictionary
+            ring = [[
+                Point(env['xmin'], env['ymin'], self._wkid),
+                Point(env['xmax'], env['ymin'], self._wkid),
+                Point(env['xmax'], env['ymax'], self._wkid),
+                Point(env['xmin'], env['ymax'], self._wkid)
+                ]]
+            return Polygon(ring, self._wkid).asArcPyObject
+        else:
+            raise ImportError("ArcPy is required for this property.")

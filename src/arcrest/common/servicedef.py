@@ -3,10 +3,11 @@ import os
 from xml.etree import ElementTree as ET
 
 import shutil
-
-import arcpy
-from arcpy import mapping
-from arcpy import env
+from .. import arcpyFound
+if arcpyFound:
+    import arcpy
+    from arcpy import mapping
+    from arcpy import env
 
 ########################################################################
 def MXDtoFeatureServiceDef( mxd_path, service_name=None, tags=None, description=None,folder_name=None,capabilities ='Query,Create,Update,Delete,Uploads,Editing,Sync',maxRecordCount=1000,server_type='MY_HOSTED_SERVICES'):
@@ -26,6 +27,8 @@ def MXDtoFeatureServiceDef( mxd_path, service_name=None, tags=None, description=
             Service Definition File - *.sd
 
     """
+    if arcpyFound == False:
+        raise ImportError("ArcPy is required for this function.")
     if not os.path.isabs(mxd_path):
         sciptPath = os.getcwd()
         mxd_path = os.path.join(sciptPath,mxd_path)
@@ -89,7 +92,8 @@ def MXDtoFeatureServiceDef( mxd_path, service_name=None, tags=None, description=
 def _modify_sddraft(sddraft,capabilities,maxRecordCount='1000'):
     """ modifies the sddraft for agol publishing
     """
-
+    if arcpyFound == False:
+        raise ImportError("ArcPy is required for this function.")
     doc = ET.parse(sddraft)
 
     root_elem = doc.getroot()
@@ -148,6 +152,8 @@ def _modify_sddraft(sddraft,capabilities,maxRecordCount='1000'):
 #----------------------------------------------------------------------
 def _prep_mxd(mxd):
     """ ensures the requires mxd properties are set to something """
+    if arcpyFound == False:
+        raise ImportError("ArcPy is required for this function.")
     changed = False
     if mxd.author.strip() == "":
         mxd.author = "NA"

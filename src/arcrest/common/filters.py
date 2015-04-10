@@ -5,7 +5,9 @@ import calendar
 import datetime
 from ..common.geometry import Polygon, Polyline, Point, MultiPoint
 from .._abstract.abstract import AbstractGeometry, BaseFilter
-import arcpy
+from .. import arcpyFound
+if arcpyFound:
+    import arcpy
 ########################################################################
 class LayerDefinitionFilter(BaseFilter):
     """
@@ -115,16 +117,16 @@ class GeometryFilter(BaseFilter):
         if isinstance(geometry, AbstractGeometry):
             self._geomObject = geometry
             self._geomType = geometry.type
-        elif isinstance(geometry, arcpy.Polygon):
+        elif arcpyFound and isinstance(geometry, arcpy.Polygon):
             self._geomObject = Polygon(geometry, wkid=geometry.spatialReference.factoryCode)
             self._geomType = "esriGeometryPolygon"
-        elif isinstance(geometry, arcpy.Point):
+        elif arcpyFound and isinstance(geometry, arcpy.Point):
             self._geomObject = Point(geometry, wkid=geometry.spatialReference.factoryCode)
             self._geomType = "esriGeometryPoint"
-        elif isinstance(geometry, arcpy.Polyline):
+        elif arcpyFound and isinstance(geometry, arcpy.Polyline):
             self._geomObject = Polyline(geometry, wkid=geometry.spatialReference.factoryCode)
             self._geomType = "esriGeometryPolyline"
-        elif isinstance(geometry, arcpy.Multipoint):
+        elif arcpyFound and isinstance(geometry, arcpy.Multipoint):
             self._geomObject = MultiPoint(geometry, wkid=geometry.spatialReference.factoryCode)
             self._geomType = "esriGeometryMultipoint"
         else:

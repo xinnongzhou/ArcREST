@@ -288,7 +288,7 @@ class AGOLTokenSecurityHandler(abstract.BaseSecurityHandler):
         self._proxy_port = proxy_port
         self._proxy_url = proxy_url
         self._token_expires_on = datetime.datetime.now() + datetime.timedelta(seconds=_defaultTokenExpiration)
-        self._initURL(org_url=org_url,token_url=token_url)
+        self._initURL(token_url=token_url)
     #----------------------------------------------------------------------
     def _initURL(self, org_url=None,
                 rest_url=None, token_url=None,
@@ -311,20 +311,10 @@ class AGOLTokenSecurityHandler(abstract.BaseSecurityHandler):
             self._surl  =  self._url
 
         if token_url is None:
-
-            results = self._do_get(url= self._surl + '/info',
-                               param_dict={'f':'json'},
-                               header=None,
-                               proxy_port=self._proxy_port,
-                               proxy_url=self._proxy_url)
-            if 'authInfo' in results and 'tokenServicesUrl' in results['authInfo']:
-
-                self._token_url = results['authInfo']['tokenServicesUrl']
-            else:
-                self._token_url = self._surl  + '/generateToken'
-
+            self._token_url = self._surl  + '/generateToken'
         else:
             self._token_url = token_url
+
         if referer_url is None:
             if not self._org_url.startswith('http://'):
                 self._referer_url = self._org_url.replace('http://', 'https://')
@@ -685,8 +675,7 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
         self._proxy_url = proxy_url
         self._token_expires_on = datetime.datetime.now() + datetime.timedelta(seconds=_defaultTokenExpiration)
 
-        self._initURL(org_url=org_url, rest_url=None, token_url=token_url,
-                     referer_url=None)
+        self._initURL()
     #----------------------------------------------------------------------
 
     def _initURL(self, org_url=None,
@@ -702,10 +691,7 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
         if rest_url is not None:
             self._url = rest_url
         else:
-            if self._org_url.lower().find('/sharing/rest') > -1:
-                self._url = self._org_url
-            else:
-                self._url = self._org_url + "/sharing/rest"
+            self._url = self._org_url + "/sharing/rest"
 
         if self._url.startswith('http://'):
             self._surl = self._url.replace('http://', 'https://')
@@ -713,18 +699,7 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
             self._surl  =  self._url
 
         if token_url is None:
-
-            results = self._do_get(url= self._surl + '/portals/info',
-                                   param_dict={'f':'json'},
-                                   header=None,
-                                   proxy_port=self._proxy_port,
-                                   proxy_url=self._proxy_url)
-            if 'authInfo' in results and 'tokenServicesUrl' in results['authInfo']:
-
-                self._token_url = results['authInfo']['tokenServicesUrl']
-            else:
-                self._token_url = self._surl  + '/generateToken'
-
+            self._token_url = self._surl  + '/generateToken'
         else:
             self._token_url = token_url
 
