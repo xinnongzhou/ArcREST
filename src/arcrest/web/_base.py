@@ -29,9 +29,17 @@ class AGOLRedirectHandler(urllib2.HTTPRedirectHandler):
         result.status = code
         return result
 
+class BaseWebOperations(object):
+    """ base class that holds all the common web request operations """
+    _referer_url = None
+    _useragent = "ArcREST"
+    _proxy_url = None
+    _proxy_port = None
+
+
 
 ########################################################################
-class BaseWebOperations(object):
+class BaseWebOperations_old(object):
     """ base class that holds operations for web requests """
 
     _referer_url = ""
