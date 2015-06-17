@@ -1,4 +1,5 @@
 import datetime
+import urllib2
 try:
     import arcpy
     arcpyFound = True
@@ -12,6 +13,7 @@ class PKISecurityHandler(abstract.BaseSecurityHandler):
     """
        This Security Handler handles PKI based security
     """
+
     _jar = None
     _handler = None
     _certificatefile = None
@@ -149,7 +151,7 @@ class PortalServerSecurityHandler(abstract.BaseSecurityHandler):
             raise AttributeError("Invalid token handler")
         self._referer = referer
         self._serverUrl = serverUrl
-    #----------------------------------------------------------------------
+    #
     @property
     def token(self):
         """gets the AGS server token"""
@@ -159,25 +161,25 @@ class PortalServerSecurityHandler(abstract.BaseSecurityHandler):
     #----------------------------------------------------------------------
     @property
     def method(self):
-        """get the security handler type"""
+        """returns the handler method"""
         return self._method
-    #----------------------------------------------------------------------
+    #
     @property
     def serverUrl(self):
         """gets/sets the server url"""
         return self._serverUrl
-    #----------------------------------------------------------------------
+    #
     @serverUrl.setter
     def serverUrl(self, value):
         """gets/sets the server url"""
         if value.lower() != self._serverUrl.lower():
             self._serverUrl = value
-    #----------------------------------------------------------------------
+    #
     @property
     def referer(self):
         """gets/sets the referer object"""
         return self._referer
-    #----------------------------------------------------------------------
+    #
     @referer.setter
     def referer(self, value):
         """gets/sets the referer object"""
@@ -214,6 +216,7 @@ class OAuthSecurityHandler(abstract.BaseSecurityHandler):
     _expires_in = None
     _proxy_url = None
     _proxy_port = None
+    _method = "OAUTH"
     #----------------------------------------------------------------------
     def __init__(self, client_id, secret_id, org_url,token_url=None,
                  proxy_url=None, proxy_port=None):
@@ -263,7 +266,11 @@ class OAuthSecurityHandler(abstract.BaseSecurityHandler):
         else:
             self._referer_url = referer_url
 
-
+    #----------------------------------------------------------------------
+    @property
+    def method(self):
+        """returns the handler method"""
+        return self._method
     #----------------------------------------------------------------------
     @property
     def proxy_url(self):
@@ -388,6 +395,7 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
     """ handles ArcGIS Maps Token Base Security
 
     """
+    _method = "TOKEN"
     _token = None
     _surl = None
     _org_url =None
@@ -424,11 +432,6 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
             self._valid = True
             self._message = "Token Generated"
         self._org_url = arcpy.GetActivePortalURL()
-<<<<<<< .mine
-
-=======
-
->>>>>>> .theirs
         if self._org_url.lower().find('/sharing/rest') > -1:
             self._url = self._org_url
         else:
@@ -438,11 +441,7 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
             self._surl = self._url.replace('http://', 'https://')
         else:
             self._surl  =  self._url
-<<<<<<< .mine
 
-=======
-
->>>>>>> .theirs
         url = '{}/portals/self'.format( self._url)
 
         parameters = {
@@ -452,26 +451,11 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
         portal_info = self._do_post(url=url,
                               param_dict=parameters,
                               proxy_url=self._proxy_url,
-<<<<<<< .mine
                               proxy_port=self._proxy_port)
 
-=======
-                                  proxy_port=self._proxy_port)
-
->>>>>>> .theirs
         if 'user' in portal_info:
             if 'username' in portal_info['user']:
-<<<<<<< .mine
-
-=======
-
->>>>>>> .theirs
-                self._username =  portal_info['user']['username']
-<<<<<<< .mine
-
-=======
-
->>>>>>> .theirs
+                self._username = portal_info['user']
         #"http://%s.%s" % (portal_info['urlKey'], portal_info['customBaseUrl'])
 
         #url = '{}/community/self'.format( self._url)
@@ -488,6 +472,11 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
     def message(self):
         """ returns any messages """
         return self._message
+    #----------------------------------------------------------------------
+    @property
+    def method(self):
+        """returns the handler method"""
+        return self._method
     #----------------------------------------------------------------------
     @property
     def valid(self):
@@ -531,11 +520,7 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
     def tokenExperationDate(self):
         """ returns when the token is not valid """
         return self._token_expires_on
-    #----------------------------------------------------------------------
-    @property
-    def tokenObtainedDate(self):
-        """ returns when the token was generated """
-        return self._token_created_on
+
     #----------------------------------------------------------------------
     @property
     def referer_url(self):
@@ -686,7 +671,7 @@ class AGOLTokenSecurityHandler(abstract.BaseSecurityHandler):
     #----------------------------------------------------------------------
     @property
     def method(self):
-        """get the security handler type"""
+        """returns the handler method"""
         return self._method
     #----------------------------------------------------------------------
     @property
@@ -887,7 +872,7 @@ class AGSTokenSecurityHandler(abstract.BaseSecurityHandler):
     #----------------------------------------------------------------------
     @property
     def method(self):
-        """get the security handler type"""
+        """returns the handler method"""
         return self._method
     #----------------------------------------------------------------------
     @property
@@ -1017,7 +1002,6 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
        proxy_url - URL of the proxy
        proxy_port - proxy port
     """
-    _method = "TOKEN"
     _token = None
     _server_token = None
     _server_token_expires_on = None
@@ -1036,6 +1020,7 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
     _expires_in = None
     _valid = True
     _message = ""
+    _method = "TOKEN"
     #----------------------------------------------------------------------
     def __init__(self,
                  username,
@@ -1106,14 +1091,14 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
             self._referer_url = referer_url
     #----------------------------------------------------------------------
     @property
+    def method(self):
+        """returns the handler method"""
+        return self._method
+    #----------------------------------------------------------------------
+    @property
     def message(self):
         """ returns any messages """
         return self._message
-    #----------------------------------------------------------------------
-    @property
-    def method(self):
-        """get the security handler type"""
-        return self._method
     #----------------------------------------------------------------------
     @property
     def valid(self):
