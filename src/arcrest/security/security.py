@@ -155,9 +155,8 @@ class PortalServerSecurityHandler(abstract.BaseSecurityHandler):
     @property
     def token(self):
         """gets the AGS server token"""
-        return self._portalTokenHandler.servertoken(
-                serverURL=self._serverUrl,
-                referer=self._referer)
+        return self._portalTokenHandler.servertoken(serverURL=self._serverUrl,
+                                                    referer=self._referer)
     #----------------------------------------------------------------------
     @property
     def method(self):
@@ -374,8 +373,9 @@ class OAuthSecurityHandler(abstract.BaseSecurityHandler):
             "grant_type":grant_type,
             "f" : "json"
         }
-        token = self._do_post(url=token_url,
-                              param_dict=params,
+        token = self._do_post(url=tokenUrl,
+                              param_dict=query_dict,
+                              securityHandler=None,
                               proxy_port=self._proxy_port,
                               proxy_url=self._proxy_url)
 
@@ -448,24 +448,15 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
             'token': token,
             'f': 'json'
         }
-        portal_info = self._do_post(url=url,
-                              param_dict=parameters,
-                              proxy_url=self._proxy_url,
-                              proxy_port=self._proxy_port)
+        portal_info = self._do_post(url=tokenUrl,
+                              param_dict=query_dict,
+                              securityHandler=None,
+                              proxy_port=self._proxy_port,
+                              proxy_url=self._proxy_url)
 
         if 'user' in portal_info:
             if 'username' in portal_info['user']:
                 self._username = portal_info['user']
-        #"http://%s.%s" % (portal_info['urlKey'], portal_info['customBaseUrl'])
-
-        #url = '{}/community/self'.format( self._url)
-        #user_info = self._do_post(url=url,
-                              #param_dict=parameters,
-                              #proxy_url=self._proxy_url,
-                              #proxy_port=self._proxy_port)
-
-        #if 'username' in user_info:
-         #   self._username = user_info['username']
 
     #----------------------------------------------------------------------
     @property
@@ -812,8 +803,9 @@ class AGOLTokenSecurityHandler(abstract.BaseSecurityHandler):
         self._token_created_on = datetime.datetime.now()
         token = self._do_post(url=tokenUrl,
                               param_dict=query_dict,
-                              proxy_url=self._proxy_url,
-                              proxy_port=self._proxy_port)
+                              securityHandler=None,
+                              proxy_port=self._proxy_port,
+                              proxy_url=self._proxy_url)
         if 'error' in token:
             self._token = None
             return token
@@ -965,8 +957,11 @@ class AGSTokenSecurityHandler(abstract.BaseSecurityHandler):
                       'f': 'json'}
         if expiration is not None:
             query_dict['expiration'] = expiration
-        token = self._do_post(url=tokenUrl, param_dict=query_dict,
-                              proxy_port=self._proxy_port, proxy_url=self._proxy_url)
+        token = self._do_post(url=tokenUrl,
+                              param_dict=query_dict,
+                              securityHandler=None,
+                              proxy_port=self._proxy_port,
+                              proxy_url=self._proxy_url)
         if "token" not in token:
             self._token = None
             self._token_created_on = None
@@ -1185,8 +1180,8 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
         if self._token is None or \
            datetime.datetime.now() >= self._token_expires_on:
             result = self._generateForTokenSecurity(username=self._username,
-                                           password=self._password,
-                                           tokenUrl=self._token_url)
+                                                    password=self._password,
+                                                    tokenUrl=self._token_url)
             if 'error' in result:
                 self._valid = False
                 self._message = result
@@ -1227,9 +1222,10 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
         if expiration is not None:
             query_dict['expiration'] = expiration
         server_token = self._do_post(url=tokenUrl,
-                              param_dict=query_dict,
-                              proxy_port=self._proxy_port,
-                              proxy_url=self._proxy_url)
+                                     param_dict=query_dict,
+                                     securityHandler=None,
+                                     proxy_port=self._proxy_port,
+                                     proxy_url=self._proxy_url)
         if 'error' in server_token:
             self._server_token = None
             self._server_token_created_on = None
@@ -1261,6 +1257,7 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
             query_dict['expiration'] = expiration
         token = self._do_post(url=tokenUrl,
                               param_dict=query_dict,
+                              securityHandler=None,
                               proxy_port=self._proxy_port,
                               proxy_url=self._proxy_url)
         if 'error' in token:
@@ -1274,11 +1271,6 @@ class PortalTokenSecurityHandler(abstract.BaseSecurityHandler):
         else:
             self._token = token['token']
             self._token_created_on = datetime.datetime.now()
-            #if token['expires'] > 86400:
-                #seconds = 86400
-            #else:
-                #seconds = int(token['expires'])
-            #self._token_expires_on = self._token_created_on + datetime.timedelta(seconds=seconds)
             self._token_expires_on = datetime.datetime.fromtimestamp(token['expires'] /1000) - \
                         datetime.timedelta(seconds=1)
             self._expires_in = (self._token_expires_on - self._token_created_on).total_seconds()
