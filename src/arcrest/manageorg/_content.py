@@ -72,11 +72,11 @@ class Content(BaseAGOLClass):
         if folderId is not None:
             url += "/%s" % folderId
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         return self._do_get(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
 
@@ -167,6 +167,7 @@ class Content(BaseAGOLClass):
         }
         return self._do_get(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
 
@@ -178,7 +179,7 @@ class Content(BaseAGOLClass):
                     securityHandler=self._securityHandler,
                     proxy_url=self._proxy_url,
                     proxy_port=self._proxy_port,
-                    initialize=False)
+                    initialize=True)
 
 
     #----------------------------------------------------------------------
@@ -191,9 +192,6 @@ class Content(BaseAGOLClass):
                            securityHandler=self._securityHandler,
                            proxy_url=self._proxy_url,
                            proxy_port=self._proxy_port)
-
-
-
 ########################################################################
 class FeatureContent(BaseAGOLClass):
     """
@@ -265,8 +263,7 @@ class FeatureContent(BaseAGOLClass):
         files = []
         url = self._url + "/analyze"
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
 
         }
         fileType = "csv"
@@ -279,12 +276,14 @@ class FeatureContent(BaseAGOLClass):
            os.path.isfile(filePath):
             params['text'] = open(filePath, 'rb').read()
             return self._do_post(url=url, param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         elif itemId is not None:
             params["fileType"] = fileType
             params['itemId'] = itemId
             return self._do_post(url=url, param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         else:
@@ -324,8 +323,7 @@ class FeatureContent(BaseAGOLClass):
         files = []
         url = self._url + "/generate"
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         params['publishParameters'] = publishParameters
         parsed = urlparse.urlparse(url)
@@ -338,11 +336,13 @@ class FeatureContent(BaseAGOLClass):
             if fileType.lower() == "csv":
                 params['text'] = open(filePath,'rb').read()
                 return self._do_post(url=url, param_dict=params,
+                                     securityHandler=self._securityHandler,
                                      proxy_url=self._proxy_url,
                                      proxy_port=self._proxy_port)
             else:
                 files.append(('file', filePath, os.path.basename(filePath)))
                 res = self._post_multipart(host=parsed.hostname,
+                                           securityHandler=self._securityHandler,
                                            port=parsed.port,
                                            selector=parsed.path,
                                            fields=params,
@@ -355,6 +355,7 @@ class FeatureContent(BaseAGOLClass):
             params["fileType"] = fileType
             params['itemId'] = itemId
             return self._do_post(url=url, param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
 ########################################################################
@@ -438,10 +439,10 @@ class Item(BaseAGOLClass):
     #----------------------------------------------------------------------
     def __init(self):
         """ loads the data into the class """
-        param_dict = {"f": "json",
-                      "token" : self._securityHandler.token
+        param_dict = {"f": "json"
         }
         json_dict = self._do_get(self._baseUrl + "/%s" % self._itemId, param_dict,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         self._json = json.dumps(json_dict)
@@ -674,7 +675,7 @@ class Item(BaseAGOLClass):
         """ URL to the thumbnail used for the item """
         if self._thumbnail is None:
             self.__init()
-        param_dict = {"token" : self._securityHandler.token}
+        param_dict = {}
         if  self._thumbnail is not None:
             imgUrl = self._baseUrl + "/" + self._itemId + "/info/" + self._thumbnail
 
@@ -683,6 +684,7 @@ class Item(BaseAGOLClass):
             fileNameSafe = "".join(x for x in fileName if x.isalnum()) + file_ext
             result = self._download_file(self._baseUrl + "/" + self._itemId + "/info/" + self._thumbnail,
                                 save_path=filePath, file_name=fileNameSafe, param_dict=param_dict,
+                                securityHandler=self._securityHandler,
                                 proxy_url=None,
                                 proxy_port=None)
             return result
@@ -840,10 +842,10 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/addComment" % self._itemId
         params = {
             "f" : "json",
-            "comment" : comment,
-            "token" : self._securityHandler.token
+            "comment" : comment
         }
         return self._do_post(url, params, proxy_port=self._proxy_port,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
     def addRating(self, rating=5.0):
@@ -855,12 +857,12 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/addRating" % self._itemId
         params = {
             "f": "json",
-            "token" : self._securityHandler.token,
             "rating" : "%s" % rating
         }
         return self._do_post(url,
                              params,
                              proxy_port=self._proxy_port,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
     def deleteComment(self, commentId):
@@ -872,10 +874,10 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/comments/%s/delete" % (self._itemId, commentId)
         params = {
             "f": "json",
-            "token" : self._securityHandler.token
         }
         return self._do_post(url,
                              params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -884,10 +886,10 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/deleteRating" % self._itemId
         params = {
             "f": "json",
-            "token" : self._securityHandler.token
         }
         return self._do_post(url,
                              params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -897,10 +899,10 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/groups" % self._itemId
         params = {
             "f": "json",
-            "token" : self._securityHandler.token
         }
         return self._do_get(url,
                              params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -908,11 +910,11 @@ class Item(BaseAGOLClass):
         """ returns details of a single comment """
         url = self._baseUrl + "/%s/comments/%s" % (self._itemId, commentId)
         params = {
-            "f": "json",
-            "token" : self._securityHandler.token
+            "f": "json"
         }
         return self._do_get(url,
                             params,
+                            securityHandler=self._securityHandler,
                             proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -921,11 +923,11 @@ class Item(BaseAGOLClass):
         """ returns all comments for a given item """
         url = self._baseUrl + "/%s/comments/" % self._itemId
         params = {
-            "f": "json",
-            "token" : self._securityHandler.token
+            "f": "json"
         }
         return self._do_get(url,
                             params,
+                            securityHandler=self._securityHandler,
                             proxy_port=self._proxy_port,
                             proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -940,14 +942,13 @@ class Item(BaseAGOLClass):
         """
 
         params = {
-
-            "token" : self._securityHandler.token
         }
         if f is not None and \
            f.lower() in ['zip', 'json']:
             params['f'] = f
         url = self._baseUrl + "/%s/data" % self._itemId
         if self.type in ["Shapefile", "CityEngine Web Scene", "Web Scene", "KML",
+                         "Code Sample",
                          "Code Attachment", "Operations Dashboard Add In",
                          "CSV", "CAD Drawing", "Service Definition",
                          "Microsoft Word", "Microsoft Powerpoint",
@@ -970,15 +971,17 @@ class Item(BaseAGOLClass):
                 raise AttributeError('savePath must be provided for a item of type: %s' % self.type)
             if os.path.isdir(savePath) == False:
                 os.makedirs(savePath)
-            url =  url + "?%s" % urllib.urlencode(params)
+            #url =  url + "?%s" % urllib.urlencode(params)
             return self._download_file(url,
                                        save_path=savePath,
                                        file_name=self.name,
+                                       securityHandler=self._securityHandler,
                                        proxy_port=self._proxy_port,
                                        proxy_url=self._proxy_url)
         else:
             results =  self._do_get(url, params,
                                     proxy_port=self._proxy_port,
+                                    securityHandler=self._securityHandler,
                                     proxy_url=self._proxy_url)
             return results
     #----------------------------------------------------------------------
@@ -987,8 +990,10 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/info/iteminfo.xml" % self._itemId
         xml = self._download_file(
             url=url,
+            param_dict={},
             save_path=os.environ['TEMP'],
             file_name="iteminfo.xml",
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port
         )
@@ -1001,11 +1006,11 @@ class Item(BaseAGOLClass):
         """ returns the item's rating """
         url = self._baseUrl + "/%s/rating" % self._itemId
         params = {
-            "f": "json",
-            "token" : self._securityHandler.token
+            "f": "json"
         }
         return self._do_get(url,
                             params,
+                            securityHandler=self._securityHandler,
                             proxy_port=self._proxy_port,
                             proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1022,13 +1027,16 @@ class Item(BaseAGOLClass):
         saveFile = saveFolder + os.sep + "item.pkinfo"
         if os.path.isfile(saveFile):
             os.remove(saveFile)
+        param_dict = {}
         url = self._baseUrl + "/%s/item.pkinfo" % self._itemId
         xml = self._download_file(
             url=url,
             save_path=saveFolder,
             file_name=os.path.basename(saveFile),
             proxy_url=self._proxy_url,
-            proxy_port=self._proxy_port
+            proxy_port=self._proxy_port,
+            securityHandler=self._securityHandler,
+            param_dict=param_dict
         )
         return xml
     #----------------------------------------------------------------------
@@ -1048,13 +1056,13 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/relatedItems" % self._itemId
         params = {
             "f": "json",
-            "token" : self._securityHandler.token,
             "relationshipType" : relationshipType
         }
         if direction is not None:
             params['direction'] = direction
         return self._do_get(url,
                             params,
+                            securityHandler=self._securityHandler,
                             proxy_port=self._proxy_port,
                             proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1076,7 +1084,6 @@ class Item(BaseAGOLClass):
         """
         params = {
             "f": "json",
-            "token" : self._securityHandler.token,
             "everyone" : everyone,
             "org" : org
         }
@@ -1085,6 +1092,7 @@ class Item(BaseAGOLClass):
         url = self._baseUrl + "/%s/share" % self._itemId
         return self._do_post(
             url = url,
+            securityHandler=self._securityHandler,
             param_dict=params,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
@@ -1098,13 +1106,13 @@ class Item(BaseAGOLClass):
         """
         params = {
             "f": "json",
-            "token" : self._securityHandler.token,
             "groups" : groups
         }
         url = self._baseUrl + "/%s/unshare" % self._itemId
         return self._do_post(
             url = url,
             param_dict=params,
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
 
@@ -1175,13 +1183,13 @@ class UserItems(BaseAGOLClass):
 
         """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         url = self._baseUrl + "/%s/items/%s/delete" % (self._username, self._itemId)
         return self._do_post(
             url = url,
             param_dict=params,
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -1203,13 +1211,13 @@ class UserItems(BaseAGOLClass):
         """
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "folder" : folder
         }
         url = self._baseUrl + "/%s/items/%s/move" % (self._username, self._itemId)
         return self._do_post(
             url = url,
             param_dict=params,
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -1220,12 +1228,12 @@ class UserItems(BaseAGOLClass):
         organization to which the user belongs
         """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         url = self._baseUrl + "/%s/items/%s/protect" % (self._username, self._itemId)
         return self._do_post(
             url = url,
+            securityHandler=self._securityHandler,
             param_dict=params,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
@@ -1249,7 +1257,6 @@ class UserItems(BaseAGOLClass):
         """
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "targetUsername" : targetUsername,
             "targetFoldername" : targetFoldername
         }
@@ -1257,6 +1264,7 @@ class UserItems(BaseAGOLClass):
         return self._do_post(
             url = url,
             param_dict=params,
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -1278,7 +1286,6 @@ class UserItems(BaseAGOLClass):
         """
         params = {
             "f": "json",
-            "token" : self._securityHandler.token,
             "everyone" : everyone,
             "org" : org
         }
@@ -1288,6 +1295,7 @@ class UserItems(BaseAGOLClass):
         return self._do_post(
             url = url,
             param_dict=params,
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -1296,14 +1304,13 @@ class UserItems(BaseAGOLClass):
         The Unprotect operation disables the item protection from deletion.
         """
         params = {
-            "f": "json",
-            "token" : self._securityHandler.token,
-
+            "f": "json"
         }
         url = self._baseUrl + "/%s/items/%s/unprotect" % (self._username, self._itemId)
         return self._do_post(
             url = url,
             param_dict=params,
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -1318,7 +1325,6 @@ class UserItems(BaseAGOLClass):
         """
         params = {
             "f": "json",
-            "token" : self._securityHandler.token,
             "groups": groups
 
         }
@@ -1326,6 +1332,7 @@ class UserItems(BaseAGOLClass):
         return self._do_post(
             url = url,
             param_dict=params,
+            securityHandler=self._securityHandler,
             proxy_url=self._proxy_url,
             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -1347,7 +1354,6 @@ class UserItems(BaseAGOLClass):
         files = []
         params = {
             "f": "json",
-            "token" : self._securityHandler.token,
             "clearEmptyFields": clearEmptyFields
         }
 
@@ -1380,6 +1386,7 @@ class UserItems(BaseAGOLClass):
                                    selector=parsed.path,
                                    fields=params,
                                    files=files,
+                                   securityHandler=self._securityHandler,
                                    ssl=parsed.scheme.lower() == 'https',
                                    proxy_url=self._proxy_url,
                                    proxy_port=self._proxy_port)
@@ -1457,10 +1464,10 @@ class UserContent(BaseAGOLClass):
         if folderId is not None:
             url += "/%s" % folderId
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         return self._do_get(url=url, param_dict=params,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)
     @property
@@ -1510,7 +1517,6 @@ class UserContent(BaseAGOLClass):
         """
         params = {
         "f" : "json",
-        "token" : self._securityHandler.token,
         'itemType' : 'file'
         }
         url = self._baseUrl + "/%s" % self._username
@@ -1542,6 +1548,7 @@ class UserContent(BaseAGOLClass):
                                               files = files,
                                               fields=params,
                                               port=parsed.port,
+                                              securityHandler=self._securityHandler,
                                               ssl=parsed.scheme.lower() == 'https',
                                               proxy_port=self._proxy_port,
                                               proxy_url=self._proxy_url)
@@ -1628,6 +1635,7 @@ class UserContent(BaseAGOLClass):
             params['itemType'] = 'file'
             res = self._do_post(url,
                                 param_dict=params,
+                                securityHandler=self._securityHandler,
                                 proxy_url=self._proxy_url,
                                 proxy_port=self._proxy_port)
             if 'id' in res.keys():
@@ -1662,6 +1670,7 @@ class UserContent(BaseAGOLClass):
             if len(files) < 1:
                 res = self._do_post(url,
                                     param_dict=params,
+                                    securityHandler=self._securityHandler,
                                     proxy_url=self._proxy_url,
                                     proxy_port=self._proxy_port)
             else:
@@ -1671,6 +1680,7 @@ class UserContent(BaseAGOLClass):
                                            selector=parsed.path,
                                            files = files,
                                            fields=params,
+                                           securityHandler=self._securityHandler,
                                            port=parsed.port,
                                            ssl=parsed.scheme.lower() == 'https',
                                            proxy_port=self._proxy_port,
@@ -1698,11 +1708,11 @@ class UserContent(BaseAGOLClass):
             "originItemId" : originItemId,
             "destinationItemId": destinationItemId,
             "relationshipType" : relationshipType,
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1718,10 +1728,10 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/%s/cancel" % (self._username, itemId)
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1748,13 +1758,13 @@ class UserContent(BaseAGOLClass):
             url = self._baseUrl + "/%s/%s/items/%s/commit" % (self._username, folderId, itemId)
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token
         }
         for key, value in additionalParams.iteritems():
             params[key] = value
         if wait:
             res = self._do_post(url=url,
                                 param_dict=params,
+                                securityHandler=self._securityHandler,
                                 proxy_port=self._proxy_port,
                                 proxy_url=self._proxy_url)
             res = self.status(itemId=res['id'])
@@ -1766,6 +1776,7 @@ class UserContent(BaseAGOLClass):
         else:
             return self._do_post(url=url,
                                  param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_port=self._proxy_port,
                                  proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1778,11 +1789,11 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/createFolder" % self._username
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "title" : name
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1799,13 +1810,13 @@ class UserContent(BaseAGOLClass):
         val = createServiceParameter.value
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "outputType" : "featureService",
             "createParameters" : json.dumps(val)
         }
 
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1823,11 +1834,11 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/%s/delete" % (self._username,
                                                  folderId)
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1839,10 +1850,10 @@ class UserContent(BaseAGOLClass):
             url += '/' + folder
 
         url += '/items/{}/delete'.format(item_id)
-        params = {'f': 'json',
-                      'token': self._securityHandler.token}
+        params = {'f': 'json'}
         jres = self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
         if 'error' in jres:
@@ -1862,10 +1873,10 @@ class UserContent(BaseAGOLClass):
             url += '/' + folder
 
         url += '/items/{}/unprotect'.format(item_id)
-        params = {'f': 'json',
-                      'token':self._securityHandler.token}
+        params = {'f': 'json'}
         jres = self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
         return jres
@@ -1880,12 +1891,12 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/deleteItems" % self._username
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "items" : items
 
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1909,7 +1920,6 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/deleteRelationship" % self._username
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "originItemId" : originItemId,
             "destinationItemid" : destinationItemId,
             "relationshipType" : relationshipType
@@ -1917,6 +1927,7 @@ class UserContent(BaseAGOLClass):
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1941,7 +1952,6 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + '/%s/export' % self._securityHandler._username
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "title" : title,
             "itemId" : itemId,
             "exportFormat" : exportFormat,
@@ -1951,6 +1961,7 @@ class UserContent(BaseAGOLClass):
             params["exportParameters"] = json.dumps(exportParameters)
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -1966,13 +1977,13 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/moveItems" % self._username
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "items" : items,
             "folder" : folder
 
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -2024,13 +2035,8 @@ class UserContent(BaseAGOLClass):
         url = url + "/publish"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             'fileType': fileType
-
         }
-        #if publishParameters is not None and \
-           #isinstance(publishParameters, BaseParameters):
-            #params['publishParameters'] = publishParameters.value
         if isinstance(buildIntialCache, bool):
             params['buildInitialCache'] = buildIntialCache
         if publishParameters is not None and \
@@ -2051,6 +2057,7 @@ class UserContent(BaseAGOLClass):
                                         files = files,
                                         fields=params,
                                         port=parsed.port,
+                                        securityHandler=self._securityHandler,
                                         ssl=parsed.scheme.lower() == 'https',
                                         proxy_port=self._proxy_port,
                                         proxy_url=self._proxy_url)
@@ -2059,6 +2066,7 @@ class UserContent(BaseAGOLClass):
         else:
             return self._do_post(url=url,
                                  param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_port=self._proxy_port,
                                  proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -2080,8 +2088,7 @@ class UserContent(BaseAGOLClass):
                       export, and createService calls.
         """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         if jobType is not None:
             params['jobType'] = jobType
@@ -2090,6 +2097,7 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/items/%s/status" % (self._username, itemId)
         return self._do_get(url=url,
                             param_dict=params,
+                            securityHandler=self._securityHandler,
                             proxy_port=self._proxy_port,
                             proxy_url=self._proxy_url)
 
@@ -2112,16 +2120,14 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/shareItems" % self._username
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "items" : items,
             "everyone" : everyone,
             "org" : org,
             "groups" : groups
-
-
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -2136,12 +2142,12 @@ class UserContent(BaseAGOLClass):
         url = self._baseUrl + "/%s/unshareItems" % self._username
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "items" : items,
             "groups" : groups
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -2174,7 +2180,6 @@ class UserContent(BaseAGOLClass):
         files = []
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "clearEmptyFields" : clearEmptyFields
         }
         if updateItemParameters is not None:
@@ -2213,6 +2218,7 @@ class UserContent(BaseAGOLClass):
                                                fields=params,
                                                port=parsed.port,
                                                ssl=parsed.scheme.lower() == 'https',
+                                               securityHandler=self._securityHandler,
                                                proxy_port=self._proxy_port,
                                                proxy_url=self._proxy_url)
         else:
@@ -2223,6 +2229,7 @@ class UserContent(BaseAGOLClass):
             res = self._do_post(url, param_dict=params,
                                 proxy_port=self._proxy_port,
                                 proxy_url=self._proxy_url,
+                                securityHandler=self._securityHandler,
                                 header=header)
         res = self._unicode_convert(res)
         return res
