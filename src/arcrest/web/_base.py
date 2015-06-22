@@ -36,6 +36,131 @@ class BaseWebOperations(object):
     _proxy_url = None
     _proxy_port = None
 
+    def _do_get():
+        pass
+    #----------------------------------------------------------------------
+    def _do_get_stnd(self, url, param_dict,
+                     handler=None, cookiejar=None,
+                     header=None, proxy_url=None,
+                     proxy_port=None,compress=True):
+        """ performs a get operation """
+        handlers = []
+        headers = [('Referer', self._referer_url),
+                   ('User-Agent', self._useragent)]
+        if not header is None  :
+            headers.append(header)
+
+        if compress:
+            headers.append(('Accept-encoding', 'gzip'))
+        opener= None
+
+        if proxy_url is not None:
+            if proxy_port is None:
+                proxy_port = 80
+            proxies = {"http":"http://%s:%s" % (proxy_url, proxy_port),
+                       "https":"https://%s:%s" % (proxy_url, proxy_port)}
+            proxy_support = urllib2.ProxyHandler(proxies)
+            handlers.append(proxy_support)
+        if handler is not None:
+            handlers.append(handler)
+        if cookiejar is not None:
+            handlers.append(urllib2.HTTPCookieProcessor(cookiejar))
+        handlers.append(AGOLRedirectHandler())
+        if len(handlers) > 0:
+            opener = urllib2.build_opener(*handlers)
+        opener.addheaders = headers
+        if len(str(urllib.urlencode(param_dict))) + len(url)> 1999:
+            resp = opener.open(url, data=urllib.urlencode(param_dict))
+        else:
+            format_url = url + "?%s" % urllib.urlencode(param_dict)
+            resp = opener.open(format_url)
+        if resp.info().get('Content-Encoding') == 'gzip':
+            buf = StringIO(resp.read())
+            f = gzip.GzipFile(fileobj=buf)
+            resp_data = f.read()
+        else:
+            resp_data = resp.read()
+        if resp_data == "" or resp_data == None or resp_data == 'null':
+            return ""
+        result = None
+        try:
+            result = json.loads(resp_data)
+        except Exception,e:
+            print e
+        if result is None:
+            return None
+
+        if 'error' in result:
+            if result['error']['message'] == 'Request not made over ssl':
+                if url.startswith('http://'):
+                    url = url.replace('http://', 'https://')
+                    return self._do_get(url=url,
+                                        param_dict=param_dict,
+                                        proxy_url=proxy_url,
+                                        proxy_port=proxy_port,
+                                        compress=compress)
+        return self._unicode_convert(result)
+    #----------------------------------------------------------------------
+    def _do_post_stnd(self,
+                      url,
+                      param_dict,
+                      securityHandler=None,
+                      proxy_url=None,
+                      proxy_port=None,
+                      header={}):
+        """ performs the POST operation and returns dictionary result """
+        handlers = []
+        headers = {'Referer': self._referer_url,
+                   'User-Agent': self._useragent,
+                   'Accept-Encoding': ''}
+        if not header is None  :
+            headers.append(header)
+
+        if compress:
+            headers.append(('Accept-encoding', 'gzip'))
+        opener= None
+
+        if proxy_url is not None:
+            if proxy_port is None:
+                proxy_port = 80
+            proxies = {"http":"http://%s:%s" % (proxy_url, proxy_port),
+                       "https":"https://%s:%s" % (proxy_url, proxy_port)}
+            proxy_support = urllib2.ProxyHandler(proxies)
+            handlers.append(proxy_support)
+        if handler is not None:
+            handlers.append(handler)
+        if cookiejar is not None:
+            handlers.append(urllib2.HTTPCookieProcessor(cookiejar))
+        handlers.append(AGOLRedirectHandler())
+        if len(handlers) > 0:
+            opener = urllib2.build_opener(handlers)
+        urllib2.install_opener(opener)
+        if len(header) > 0 :
+            headers = dict(headers.items() + header.items())
+
+        request = urllib2.Request(url, urllib.urlencode(param_dict), headers=headers)
+        result = ""
+        try:
+
+            result = urllib2.urlopen(request,data=urllib.urlencode(param_dict)).read()
+        except urllib2.HTTPError,e:
+            return {'error':{'code':e.code}}
+        if result =="":
+            return ""
+        jres = json.loads(result)
+        if 'error' in jres:
+            if jres['error']['message'] == 'Request not made over ssl':
+                if url.startswith('http://'):
+                    url = url.replace('http://', 'https://')
+                    return self._do_post(url,
+                                         param_dict,
+                                         securityhandler=securityHandler,
+                                         header=header,
+                                         proxy_url=proxy_url,
+                                         proxy_port=proxy_port)
+
+        return self._unicode_convert(jres)
+
 
 
 ########################################################################
