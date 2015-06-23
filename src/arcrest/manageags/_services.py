@@ -42,11 +42,11 @@ class Services(BaseAGSServer):
     def __init(self):
         """ populates server admin information """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         json_dict = self._do_get(url=self._currentURL,
                                  param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         self._json = json.dumps(json_dict)
@@ -136,11 +136,11 @@ class Services(BaseAGSServer):
         """ returns the services in the current folder """
         self._services = []
         params = {
-                    "f" : "json",
-                    "token" : self._securityHandler.token
+                    "f" : "json"
                 }
         json_dict = self._do_get(url=self._currentURL,
                                  param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         if "services" in json_dict.keys():
@@ -176,8 +176,7 @@ class Services(BaseAGSServer):
             if v.upper() not in allowed_service_types:
                 return {"message" : "%s is not an allowed service type." % v}
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         type_services = []
         folders = self.folders
@@ -189,6 +188,7 @@ class Services(BaseAGSServer):
             else:
                 url = baseURL + "/%s" % folder
             res = self._do_get(url, params,
+                               securityHandler=self._securityHandler,
                                proxy_url=self._proxy_url,
                                proxy_port=self._proxy_port)
             if res.has_key("services"):
@@ -223,11 +223,11 @@ class Services(BaseAGSServer):
             uURL = self._url + "/permissions/add"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "principal" : principal,
             "isAllowed" : isAllowed
         }
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -243,10 +243,10 @@ class Services(BaseAGSServer):
         uURL = self._url + "/permissions/clean"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "principal" : principal
         }
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -261,12 +261,12 @@ class Services(BaseAGSServer):
         """
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "folderName" : folderName,
             "description" : description
         }
         uURL = self._url + "/createFolder"
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -279,14 +279,14 @@ class Services(BaseAGSServer):
               JSON message as dictionary
         """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token,
+            "f" : "json"
         }
         if folderName in self.folders:
             uURL = self._url + "/%s/delete" % folderName
             return self._do_post(url=uURL, param_dict=params,
-                             proxy_url=self._proxy_url,
-                             proxy_port=self._proxy_port)
+                                 securityHandler=self._securityHandler,
+                                 proxy_url=self._proxy_url,
+                                 proxy_port=self._proxy_port)
         else:
             return {"error" : "folder does not exist"}
     #----------------------------------------------------------------------
@@ -309,10 +309,10 @@ class Services(BaseAGSServer):
                                                      serviceName,
                                                      serviceType)
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     def service_report(self, folder=None):
@@ -330,10 +330,10 @@ class Services(BaseAGSServer):
             uURL = self._url + "/%s/report" % folder
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "parameters" : items
         }
         return self._do_get(url=uURL, param_dict=params,
+                            securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -341,14 +341,14 @@ class Services(BaseAGSServer):
     def types(self):
         """ returns the allowed services types """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         uURL = self._url + "/types"
         return self._do_get(url=uURL,
                             param_dict=params,
-                             proxy_url=self._proxy_url,
-                             proxy_port=self._proxy_port)
+                            securityHandler=self._securityHandler,
+                            proxy_url=self._proxy_url,
+                            proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
     def rename_service(self, serviceName, serviceType,
                        serviceNewName, folder=None):
@@ -365,7 +365,6 @@ class Services(BaseAGSServer):
         """
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "serviceName" : serviceName,
             "serviceType" : serviceType,
             "serviceNewName" : serviceNewName
@@ -375,6 +374,7 @@ class Services(BaseAGSServer):
         else:
             uURL = self._url + "/%s/renameService" % folder
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -385,8 +385,7 @@ class Services(BaseAGSServer):
         """
         url = self._url + "/createService"
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         if isinstance(service, str):
             params['service'] = service
@@ -394,6 +393,7 @@ class Services(BaseAGSServer):
             params['service'] = json.dumps(service)
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -420,20 +420,13 @@ class Services(BaseAGSServer):
         url = self._url + "/stopServices"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "service" : json.dumps(services)
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
-    ##----------------------------------------------------------------------
-    #@property
-    #def extensions(self):
-        #"""
-
-        #"""
-        #return self._extentions
 
 ########################################################################
 class AGSService(BaseAGSServer):
@@ -497,11 +490,11 @@ class AGSService(BaseAGSServer):
     def __init(self):
         """ populates server admin information """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         json_dict = self._do_get(url=self._currentURL,
                                  param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         self._json = json.dumps(json_dict)
@@ -736,22 +729,22 @@ class AGSService(BaseAGSServer):
     def start_service(self):
         """ starts the specific service """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         uURL = self._url + "/start"
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
     def stop_service(self):
         """ stops the current service """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         uURL = self._url + "/stop"
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -765,10 +758,10 @@ class AGSService(BaseAGSServer):
         """deletes a service from arcgis server"""
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token
         }
         uURL = self._url + "/delete"
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -777,32 +770,32 @@ class AGSService(BaseAGSServer):
         """ returns the status of the service """
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token
         }
         uURL = self._url + "/status"
         return self._do_get(url=uURL, param_dict=params,
+                            securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     @property
     def statistics(self):
         """ returns the stats for the service """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         uURL = self._url + "/statistics"
         return self._do_get(url=uURL, param_dict=params,
+                            securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     @property
     def permissions(self):
         """ returns the permissions for the service """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         uURL = self._url + "/permissions"
         return self._do_get(url=uURL, param_dict=params,
+                            securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -810,11 +803,11 @@ class AGSService(BaseAGSServer):
     def iteminfo(self):
         """ returns the item information """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         uURL = self._url + "/iteminfo"
         return self._do_get(url=uURL, param_dict=params,
+                            securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -832,9 +825,7 @@ class AGSService(BaseAGSServer):
         import urlparse
         params = {
             "f" : "json",
-            "folder" : folder,
-            "token" : self._securityHandler.token
-
+            "folder" : folder
         }
         files.append(('file', filePath, os.path.basename(filePath)))
         parsed = urlparse.urlparse(url)
@@ -843,6 +834,7 @@ class AGSService(BaseAGSServer):
                                     selector=parsed.path,
                                     fields=params,
                                     files=files,
+                                    securityHandler=self._securityHandler,
                                     ssl=parsed.scheme.lower() == 'https',
                                     proxy_url=self._proxy_url,
                                     proxy_port=self._proxy_port)
@@ -862,11 +854,11 @@ class AGSService(BaseAGSServer):
         url = self._url + "/iteminfo/edit"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "serviceItemInfo" : json.dumps(json_dict)
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -886,10 +878,10 @@ class AGSService(BaseAGSServer):
 
         url = self._url + "/iteminfo/manifest/manifest.%s" % fileType
         params = {
-            "token" : self._securityHandler.token
         }
         f = self._download_file(url=url, save_path=tempfile.gettempdir(),
                             file_name=os.path.basename(url), param_dict=params,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)
         return open(f, 'r').read()
@@ -908,11 +900,11 @@ class AGSService(BaseAGSServer):
         uURL = self._url + "/permissions/add"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "principal" : principal,
             "isAllowed" : isAllowed
         }
         return self._do_post(url=uURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -926,8 +918,6 @@ class AGSService(BaseAGSServer):
         url = self._url + "/edit"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
-
         }
         if isinstance(service, str):
             params['service'] = service
@@ -935,7 +925,6 @@ class AGSService(BaseAGSServer):
             params['service'] = json.dumps(service)
 
         return self._do_post(url=url, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
-
-

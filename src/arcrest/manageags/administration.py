@@ -57,7 +57,11 @@ class AGSAdministration(BaseAGSServer):
             "f" : "json",
             "token" : self._securityHandler.token
         }
-        json_dict = self._do_get(url=self._url, param_dict=params)
+        json_dict = self._do_get(url=self._url,
+                                 param_dict=params,
+                                 securityHandler=self._securityHandler,
+                                 proxy_url=self._proxy_url,
+                                 proxy_port=self._proxy_port)
         self._json = json.dumps(json_dict)
         attributes = [attr for attr in dir(self)
                     if not attr.startswith('__') and \
@@ -144,7 +148,6 @@ class AGSAdministration(BaseAGSServer):
         url = self._url + "/createNewSite"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "cluster" : cluster,
             "directories" : directories,
             "username" : username,
@@ -155,6 +158,7 @@ class AGSAdministration(BaseAGSServer):
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -183,13 +187,13 @@ class AGSAdministration(BaseAGSServer):
         url = self._url + "/joinSite"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "adminURL" : adminURL,
             "username" : username,
             "password" : password
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -211,11 +215,11 @@ class AGSAdministration(BaseAGSServer):
         """
         url = self._url + "/deleteSite"
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -235,13 +239,13 @@ class AGSAdministration(BaseAGSServer):
         """
         url = self._url + "/exportSite"
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         if location is not None:
             params['location'] = location
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -268,11 +272,11 @@ class AGSAdministration(BaseAGSServer):
         url = self._url + "/importSite"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "location" : location
         }
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -282,10 +286,10 @@ class AGSAdministration(BaseAGSServer):
         url = self._url + "/publicKey"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token
         }
         return self._do_get(url=url,
                             param_dict=params,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------

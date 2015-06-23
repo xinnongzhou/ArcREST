@@ -78,15 +78,15 @@ class FeatureService(abstract.BaseAGOLClass):
                 self._username = securityHandler.username
                 self._password = securityHandler._password
                 self._token_url = securityHandler.token_url
-              
+
                 self._securityHandler = securityHandler
 
                 self._referer_url = securityHandler.referer_url
             elif isinstance(securityHandler, security.ArcGISTokenSecurityHandler):
                     self._username = securityHandler.username
                     self._securityHandler = securityHandler
-            
-                    self._referer_url = securityHandler.referer_url            
+
+                    self._referer_url = securityHandler.referer_url
             elif isinstance(securityHandler, security.PortalTokenSecurityHandler):
                 parsedURL = urlparse(url=url)
                 pathParts = parsedURL.path.split('/')
@@ -98,7 +98,7 @@ class FeatureService(abstract.BaseAGOLClass):
                 self._securityHandler = securityHandler
                 self._referer_url = securityHandler.referer_url
             elif isinstance(securityHandler, security.OAuthSecurityHandler):
-               
+
                 self._securityHandler = securityHandler
                 self._referer_url = securityHandler.referer_url
         if initialize:
@@ -107,11 +107,11 @@ class FeatureService(abstract.BaseAGOLClass):
     def __init(self):
         """ loads the data into the class """
         params = {"f": "json"}
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
 
         json_dict = self._do_get(self._url, params,
-                                 proxy_url=self._proxy_url, proxy_port=self._proxy_port)
+                                 securityHandler=self._securityHandler,
+                                 proxy_url=self._proxy_url,
+                                 proxy_port=self._proxy_port)
         self._json_dict = json_dict
         self._json = json.dumps(self._json_dict,
                                 default=_date_handler)
@@ -294,9 +294,8 @@ class FeatureService(abstract.BaseAGOLClass):
         """ gets layers for the featuer service """
 
         params = {"f": "json"}
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         json_dict = self._do_get(self._url, params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         self._layers = []
@@ -313,10 +312,8 @@ class FeatureService(abstract.BaseAGOLClass):
         """ gets layers for the featuer service """
 
         params = {"f": "json"}
-
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         json_dict = self._do_get(self._url, params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url, proxy_port=self._proxy_port)
         self._tables = []
         if json_dict.has_key("tables"):
@@ -434,8 +431,6 @@ class FeatureService(abstract.BaseAGOLClass):
                   "returnCountOnly": returnCountOnly,
                   "returnZ": returnZ,
                   "returnM" : returnM}
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         if not layerDefsFilter is None and \
            isinstance(layerDefsFilter, LayerDefinitionFilter):
             params['layerDefs'] = layerDefsFilter.filter
@@ -454,6 +449,7 @@ class FeatureService(abstract.BaseAGOLClass):
             params['time'] = timeFilter.filter
         res =  self._do_get(url=qurl,
                             param_dict=params,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)
         if returnIdsOnly == False and returnCountOnly == False:
@@ -540,8 +536,6 @@ class FeatureService(abstract.BaseAGOLClass):
             "returnM" : returnM,
             "returnZ" : returnZ
         }
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         if gdbVersion is not None:
             params['gdbVersion'] = gdbVersion
         if definitionExpression is not None:
@@ -553,7 +547,9 @@ class FeatureService(abstract.BaseAGOLClass):
         if geometryPrecision is not None:
             params['geometryPrecision'] = geometryPrecision
         quURL = self._url + "/queryRelatedRecords"
-        res = self._do_get(url=quURL, param_dict=params, proxy_url=self._proxy_url, proxy_port=self._proxy_port)
+        res = self._do_get(url=quURL, param_dict=params,
+                           securityHandler=self._securityHandler,
+                           proxy_url=self._proxy_url, proxy_port=self._proxy_port)
         return res
     #----------------------------------------------------------------------
     @property
@@ -563,11 +559,11 @@ class FeatureService(abstract.BaseAGOLClass):
             "f" : "json",
 
         }
-        if not self._securityHandler is None:
-            params["token"] = self._securityHandler.token
         url = self._url + "/replicas"
         return self._do_get(url, params,
-                            proxy_url=self._proxy_url, proxy_port=self._proxy_port)
+                            securityHandler=self._securityHandler,
+                            proxy_url=self._proxy_url,
+                            proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
     def unRegisterReplica(self, replica_id):
         """
@@ -580,10 +576,9 @@ class FeatureService(abstract.BaseAGOLClass):
             "f" : "json",
             "replicaID" : replica_id
         }
-        if not self._securityHandler is None:
-            params["token"] = self._securityHandler.token
         url = self._url + "/unRegisterReplica"
         return self._do_post(url, params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -598,10 +593,9 @@ class FeatureService(abstract.BaseAGOLClass):
         params = {
             "f" : "json"
         }
-        if not self._securityHandler is None:
-            params["token"] = self._securityHandler.token
         url = self._url + "/replicas/%s" + replica_id
         return self._do_get(url, param_dict=params,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -654,8 +648,6 @@ class FeatureService(abstract.BaseAGOLClass):
                 "returnAttachments" : returnAttachments,
                 "async" : False
             }
-            if not self._securityHandler is None:
-                params["token"] = self._securityHandler.token
             if not geometryFilter is None and \
                isinstance(geometryFilter, GeometryFilter):
                 gf = geometryFilter.filter
@@ -669,12 +661,14 @@ class FeatureService(abstract.BaseAGOLClass):
                 params['dataFormat'] = "filegdb"
                 params['syncModel'] = 'none'
                 res = self._do_post(url=url, param_dict=params,
+                                    securityHandler=self._securityHandler,
                                     proxy_url=self._proxy_url,
                                     proxy_port=self._proxy_port)
                 if res.has_key("responseUrl"):
                     zipURL = res["responseUrl"]
                     dl_file = self._download_file(url=zipURL,
                                         save_path=out_path,
+                                        securityHandler=self._securityHandler,
                                         file_name=os.path.basename(zipURL)
                                         )
                     self._unzip_file(zip_file=dl_file, out_folder=out_path)
@@ -683,7 +677,9 @@ class FeatureService(abstract.BaseAGOLClass):
                 else:
                     return None
             else:
-                res = self._do_post(url=url, param_dict=params, proxy_url=self._proxy_url, proxy_port=self._proxy_port)
+                res = self._do_post(url=url, param_dict=params,
+                                    securityHandler=self._securityHandler,
+                                    proxy_url=self._proxy_url, proxy_port=self._proxy_port)
                 return res
 
         return "Not Supported"

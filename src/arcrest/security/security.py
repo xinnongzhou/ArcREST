@@ -373,8 +373,8 @@ class OAuthSecurityHandler(abstract.BaseSecurityHandler):
             "grant_type":grant_type,
             "f" : "json"
         }
-        token = self._do_post(url=tokenUrl,
-                              param_dict=query_dict,
+        token = self._do_post(url=token_url,
+                              param_dict=params,
                               securityHandler=None,
                               proxy_port=self._proxy_port,
                               proxy_url=self._proxy_url)
@@ -448,7 +448,7 @@ class ArcGISTokenSecurityHandler(abstract.BaseSecurityHandler):
             'token': token,
             'f': 'json'
         }
-        portal_info = self._do_post(url=tokenUrl,
+        portal_info = self._do_post(url=url,
                               param_dict=query_dict,
                               securityHandler=None,
                               proxy_port=self._proxy_port,

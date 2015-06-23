@@ -38,10 +38,10 @@ class Info(BaseAGSServer):
     def __init(self):
         """ populates server admin information """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         json_dict = self._do_get(url=self._url, param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         self._json = json.dumps(json_dict)
@@ -122,10 +122,9 @@ class Info(BaseAGSServer):
         params = {
             "f" : "json"
         }
-        if not self._securityHandler is None:
-            params['token'] = self._securityHandler.token
         return self._do_get(url=url,
                             param_dict=params,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
@@ -136,9 +135,9 @@ class Info(BaseAGSServer):
         """
         url = self._url + "/getAvailableTimeZones"
         params = {
-            "token" : self._securityHandler.token,
             "f" : "json"
         }
         return self._do_get(url, params,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)

@@ -29,11 +29,11 @@ class KML(BaseAGSServer):
     def __init(self):
         """ populates server admin information """
         params = {
-            "f" : "json",
-            "token" : self._securityHandler.token
+            "f" : "json"
         }
         json_dict = self._do_get(url=self._url,
                                  param_dict=params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         attributes = [attr for attr in dir(self)
@@ -56,10 +56,10 @@ class KML(BaseAGSServer):
         kmlURL = self._url + "/createKmz"
         params = {
             "f" : "json",
-            "token" : self._securityHandler.token,
             "kml" : kmz_as_json
         }
         return self._do_post(url=kmlURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_url=self._proxy_url,
                              proxy_port=self._proxy_port)
     #----------------------------------------------------------------------

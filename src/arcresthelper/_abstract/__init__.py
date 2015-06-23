@@ -1,3 +1,3 @@
 import abstract
 
-__version__ = "2.1.100"
+__version__ = "3.0.0"

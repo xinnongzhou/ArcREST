@@ -80,7 +80,6 @@ class FeatureLayer(BaseAGSServer):
             self._securityHandler = securityHandler
         if not securityHandler is None:
             self._referer_url = securityHandler.referer_url
-            self._token = securityHandler.token
         elif securityHandler is None:
             pass
         else:
@@ -96,12 +95,9 @@ class FeatureLayer(BaseAGSServer):
     #----------------------------------------------------------------------
     def __init(self):
         """ inializes the properties """
-        params = {
-            "f" : "json",
-        }
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
+        params = {"f" : "json"}
         json_dict = self._do_get(self._url, params,
+                                 securityHandler=self._securityHandler,
                                  proxy_url=self._proxy_url,
                                  proxy_port=self._proxy_port)
         self._json = json.dumps(json_dict)
@@ -418,8 +414,6 @@ class FeatureLayer(BaseAGSServer):
         params = {
             "f" : "json"
         }
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         if gdbVersion is not None:
             params['gdbVersion'] = gdbVersion
         if isinstance(rollbackOnFailure, bool):
@@ -434,6 +428,7 @@ class FeatureLayer(BaseAGSServer):
         else:
             return None
         return self._do_post(url=url,
+                             securityHandler=self._securityHandler,
                              param_dict=params, proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -479,8 +474,6 @@ class FeatureLayer(BaseAGSServer):
         if self.hasAttachments == True:
             url = self._url + "/%s/addAttachment" % featureId
             params = {'f':'json'}
-            if self._securityHandler is not None:
-                params['token'] = self._securityHandler.token
             parsed = urlparse(url)
             files = []
             files.append(('attachment', attachment, os.path.basename(attachment)))
@@ -489,6 +482,7 @@ class FeatureLayer(BaseAGSServer):
                                        files=files,
                                        fields=params,
                                        port=parsed.port,
+                                       securityHandler=self._securityHandler,
                                        ssl=parsed.scheme.lower() == 'https',
                                        proxy_url=self._proxy_url,
                                        proxy_port=self._proxy_port)
@@ -542,9 +536,9 @@ class FeatureLayer(BaseAGSServer):
         if objectIds is not None and \
            objectIds != "":
             params['objectIds'] = objectIds
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
-        result = self._do_post(url=dURL, param_dict=params, proxy_port=self._proxy_port,
+        result = self._do_post(url=dURL, param_dict=params,
+                               securityHandler=self._securityHandler,
+                               proxy_port=self._proxy_port,
                                proxy_url=self._proxy_url)
         self.__init()
         return result
@@ -582,8 +576,6 @@ class FeatureLayer(BaseAGSServer):
         editURL = self._url + "/applyEdits"
         params = {"f": "json"
                   }
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         if len(addFeatures) > 0 and \
            isinstance(addFeatures[0], Feature):
             params['adds'] = json.dumps([f.asDictionary for f in addFeatures],
@@ -599,6 +591,7 @@ class FeatureLayer(BaseAGSServer):
            isinstance(deleteFeatures, str):
             params['deletes'] = deleteFeatures
         return self._do_post(url=editURL, param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
     #----------------------------------------------------------------------
@@ -620,8 +613,6 @@ class FeatureLayer(BaseAGSServer):
         }
         if gdbVersion is not None:
             params['gdbVersion'] = gdbVersion
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         if isinstance(features, Feature):
             params['features'] = json.dumps([features.asDictionary])
         elif isinstance(features, list):
@@ -637,6 +628,7 @@ class FeatureLayer(BaseAGSServer):
             return {'message' : "invalid inputs"}
         updateURL = self._url + "/updateFeatures"
         res = self._do_post(url=updateURL,
+                            securityHandler=self._securityHandler,
                             param_dict=params, proxy_port=self._proxy_port,
                             proxy_url=self._proxy_url)
         return res
@@ -684,8 +676,6 @@ class FeatureLayer(BaseAGSServer):
                   "returnIdsOnly" : returnIDsOnly,
                   "returnCountOnly" : returnCountOnly,
                   }
-        if not self._securityHandler is None:
-            params["token"] = self._securityHandler.token
         if not timeFilter is None and \
            isinstance(timeFilter, filters.TimeFilter):
             params['time'] = timeFilter.filter
@@ -697,7 +687,9 @@ class FeatureLayer(BaseAGSServer):
             params['spatialRelationship'] = gf['spatialRel']
             params['inSR'] = gf['inSR']
         fURL = self._url + "/query"
-        results = self._do_get(fURL, params, proxy_port=self._proxy_port,
+        results = self._do_get(fURL, params,
+                               securityHandler=self._securityHandler,
+                               proxy_port=self._proxy_port,
                                proxy_url=self._proxy_url)
         if 'error' in results:
             raise ValueError (results)
@@ -769,14 +761,13 @@ class FeatureLayer(BaseAGSServer):
         elif isinstance(calcExpression, list):
             params["calcExpression"] = json.dumps(calcExpression,
                                                   default=_date_handler)
-        if self._securityHandler is not None:
-            params['token'] = self._securityHandler.token
         if sqlFormat.lower() in ['native', 'standard']:
             params['sqlFormat'] = sqlFormat.lower()
         else:
             params['sqlFormat'] = "standard"
         return self._do_post(url=url,
                              param_dict=params,
+                             securityHandler=self._securityHandler,
                              proxy_port=self._proxy_port,
                              proxy_url=self._proxy_url)
 ########################################################################
@@ -797,7 +788,6 @@ class GroupLayer(FeatureLayer):
             self._securityHandler = securityHandler
         if not securityHandler is None:
             self._referer_url = securityHandler.referer_url
-            self._token = securityHandler.token
         elif securityHandler is None:
             pass
         else:
@@ -811,6 +801,7 @@ class GroupLayer(FeatureLayer):
         if self._securityHandler is not None:
             params['token'] = self._securityHandler.token
         json_dict = json.loads(self._do_get(self._url, params,
+                                            securityHandler=self._securityHandler,
                                             proxy_url=self._proxy_url,
                                             proxy_port=self._proxy_port))
         attributes = [attr for attr in dir(self)
