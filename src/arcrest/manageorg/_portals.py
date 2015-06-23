@@ -88,6 +88,15 @@ class PortalSelf(BaseAGOLClass):
     _portalMode = None
     _json_dict = None
     _json = None
+
+    _platform = None
+    _disableSignup = None
+    _portalLocalHttpPort = None
+    _isWindows = None
+    _samlEnabled = None
+    _portalLocalHttpsPort = None
+    _hostedServerHostedFolder = None
+    _portalLocalHostname = None
     #----------------------------------------------------------------------
     def __init__(self, culture,
                  region,
@@ -153,6 +162,62 @@ class PortalSelf(BaseAGOLClass):
         if self._json_dict is not None:
             return json.dumps(self._json_dict)
         return "{}"
+    #----------------------------------------------------------------------
+    @property
+    def platform(self):
+        """gets the platform info"""
+        if self._platform is None:
+            self.__init()
+        return self._platform
+    #----------------------------------------------------------------------
+    @property
+    def disableSignup(self):
+        """returns the disableSignup value"""
+        if self._disableSignup is None:
+            self.__init()
+        return self._disableSignup
+    #----------------------------------------------------------------------
+    @property
+    def portalLocalHttpPort(self):
+        """gets the portalLocalHttpPort value"""
+        if self._portalLocalHttpPort is None:
+            self.__init()
+        return self._portalLocalHttpPort
+    #----------------------------------------------------------------------
+    @property
+    def isWindows(self):
+        """determines if the OS is windows or not"""
+        if self._isWindows is None:
+            self.__init()
+        return self._isWindows
+    #----------------------------------------------------------------------
+    @property
+    def samlEnabled(self):
+        """boolean values determines if saml is used on services"""
+        if self._samlEnabled is None:
+            self.__init()
+        return self._samlEnabled
+    #----------------------------------------------------------------------
+    @property
+    def portalLocalHttpsPort(self):
+        """gets the portalLocalHttpsPort value"""
+        if self._portalLocalHttpsPort is None:
+            self.__init()
+        return self._portalLocalHttpsPort
+    #----------------------------------------------------------------------
+    @property
+    def hostedServerHostedFolder(self):
+        """returns the folder containing the hosted folder"""
+        if self._hostedServerHostedFolder is None:
+            self.__init()
+        return self._hostedServerHostedFolder
+    #----------------------------------------------------------------------
+    @property
+    def portalLocalHostname(self):
+        """returns the portal local hostname"""
+        if self._portalLocalHostname is None:
+            self.__init()
+        return self._portalLocalHostname
     #----------------------------------------------------------------------
     @property
     def featuredGroups(self):

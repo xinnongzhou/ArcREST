@@ -49,7 +49,14 @@ class Content(BaseAGOLClass):
                               securityHandler=self._securityHandler,
                               proxy_url=self._proxy_url,
                               proxy_port=self._proxy_port)
-
+    def __getCurrentUsername(self):
+        """gets the current username"""
+        from . import Administration, _portals
+        admin = Administration(url=self._securityHandler.org_url,
+                               securityHandler=self._securityHandler,
+                               proxy_url=self._proxy_url,
+                               proxy_port=self._proxy_port)
+        return  admin.portals().portalSelf().user['username']
     #----------------------------------------------------------------------
     def getUserContent(self, username=None, folderId=None):
         """
@@ -66,14 +73,11 @@ class Content(BaseAGOLClass):
            username - name of user to query
         """
         if username is None:
-            username = self._securityHandler.username
-
+            username = self.__getCurrentUsername()
         url = self._url + "/users/%s" % username
         if folderId is not None:
             url += "/%s" % folderId
-        params = {
-            "f" : "json"
-        }
+        params = {"f" : "json"}
         return self._do_get(url=url,
                              param_dict=params,
                              securityHandler=self._securityHandler,

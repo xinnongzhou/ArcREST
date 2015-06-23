@@ -27,10 +27,10 @@ class Administration(BaseAGOLClass):
         self._securityHandler = securityHandler
         if url is None and not securityHandler is None:
             url = securityHandler.org_url
-        if proxy_url is None and not securityHandler is None:
-            self._proxy_url = securityHandler.proxy_url
-        if proxy_port is None and not securityHandler is None:
-            self._proxy_url = securityHandler.proxy_port
+        #if proxy_url is None and not securityHandler is None:
+            #self._proxy_url = securityHandler.proxy_url
+        #if proxy_port is None and not securityHandler is None:
+            #self._proxy_url = securityHandler.proxy_port
 
         if url is None or url == '':
             raise AttributeError("URL or Security Hanlder needs to be specified")
@@ -48,13 +48,10 @@ class Administration(BaseAGOLClass):
         self._proxy_url = proxy_url
         self._proxy_port = proxy_port
         if securityHandler is not None:
-            if isinstance(securityHandler, AGOLTokenSecurityHandler) or \
-               isinstance(securityHandler, PortalTokenSecurityHandler) or \
-                isinstance(securityHandler, ArcGISTokenSecurityHandler) or \
-               isinstance(securityHandler, OAuthSecurityHandler):
-                self._referer_url = securityHandler.referer_url
-            else:
-                raise AttributeError("Security Handler Must be AGOLTokenSecurityHandler or PortalTokenSecurityHandler")
+
+            self._referer_url = securityHandler.referer_url
+        else:
+            raise AttributeError("Security Handler Must be AGOLTokenSecurityHandler or PortalTokenSecurityHandler")
         if initialize:
             self.__init(url=url)
     #----------------------------------------------------------------------
@@ -63,11 +60,9 @@ class Administration(BaseAGOLClass):
         params = {
             "f" : "json"
         }
-        #if self._securityHandler is not None:
-        #    params['token'] = self._securityHandler.token
         json_dict = self._do_get(url=url,
                                  param_dict=params,
-                                 handler=self._securityHandler,
+                                 securityHandler=self._securityHandler,
                                  proxy_port=self._proxy_port,
                                  proxy_url=self._proxy_url)
         self._json_dict = json_dict
@@ -191,7 +186,7 @@ class Administration(BaseAGOLClass):
             params['bbox'] = bbox
         return self._do_get(url=url,
                             param_dict=params,
-                            securityhandler=self._securityHandler,
+                            securityHandler=self._securityHandler,
                             proxy_url=self._proxy_url,
                             proxy_port=self._proxy_port)
     #----------------------------------------------------------------------
